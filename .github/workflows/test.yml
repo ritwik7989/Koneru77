@@ -52,7 +52,7 @@ jobs:
           mkdir sfdx-cli
           tar xJf sfdx-linux-amd64.tar.xz -C sfdx-cli --strip-components 1
           ./sfdx-cli/install
-		  
+
       - name: Authorize NACI2
         if: ${{ env.PR_NUMBER%3 == 0 }}
         run: sfdx auth:jwt:grant -u $USERNAME -f ./buildfiles/WorldpayDevHub.key -i $CLIENTID -r $URL -a NACI2
