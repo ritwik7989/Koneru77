@@ -52,7 +52,7 @@ jobs:
 
       - name: Get MOD Value
         run: |
-         echo ::set-env name=REMAINDER::$(($PR_NUMBER%3))
+         echo ::set-env name=REMAINDER::$(($PR_NUMBER-3))
          
       - name: Authorize NACI2
         if: ${{ env.REMAINDER == 0 }}
