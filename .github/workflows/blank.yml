@@ -1,0 +1,84 @@
+# This is a basic workflow to help you get started with Actions
+
+name: TestDeploy
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the Pre-Release-Sprint-4-1 branch
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - '*Release.2021.[0-1]\d*'
+      - '*Hotfix.2021.[0-1]\d.[0-1]\d*'
+      - '*Release.2022.[0-1]\d*'  
+    paths-ignore:
+      - 'buildfiles/**'
+      - '.github/**'
+      - 'DX Batch Files/**'
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  TestDeployToCI:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      URL: https://test.salesforce.com
+      PR_NUMBER: ${{ github.event.number }}
+      USERNAME: fisdevopsuser@fisglobal.com.na.naci2
+      CLIENTID: 3MVG9eMnfmfDO5NDmXW4W0sFRz0vaqk_OPeYnNq6B601ASzoC.6ATAee3lPyJZeIQgG5CSFIQVNYLy8k1HNZ4     
+      USERNAME1: fisdevopsuser@fisglobal.com.na.naci3
+      CLIENTID1: 3MVG9eMnfmfDO5NDmXW4W0sFRz0cKS8iSW30vIdscgzKPNMTVZxzVr9ULyC_hFXdm022tx6e_Q2_KTQwGd22A     
+      USERNAME2: fisdevopsuser@fisglobal.com.na.naci4
+      CLIENTID2: 3MVG9EMJF5MdlzDpZV.paxtHtZ0jjVLQp7hWrRkHVJdeM2RYibrVXpeTJvZA3LHq5v5xbKdO7KaXzGGuJBN7x
+      SFDX_USE_GENERIC_UNIX_KEYCHAIN: true
+      BASEBRANCH:  origin/master
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '14.0.2' # The JDK version to make available on the path.
+          architecture: x64 # (x64 or x86) - defaults to x64
+
+      - name: Fetch All Branches
+        run: git fetch --all
+
+      - name: Execute GitDiff
+        run: java -cp java -jar ./buildfiles/GitDiff.jar $BASEBRANCH CheckOnly
+
+      - name: Install SFDX
+        run: |
+          wget https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz
+          mkdir sfdx-cli
+          tar xJf sfdx-linux-amd64.tar.xz -C sfdx-cli --strip-components 1
+          ./sfdx-cli/install
+		  
+      - name: Authorize NACI2
+        if: ${{ env.PR_NUMBER%3 == 0 }}
+        run: sfdx auth:jwt:grant -u $USERNAME -f ./buildfiles/WorldpayDevHub.key -i $CLIENTID -r $URL -a NACI2
+
+      - name: Test NACI2 Deploy
+        if: ${{ env.PR_NUMBER%3 == 0 }}
+        run: |
+         cd ReleaseDeploy
+         sfdx force:source:deploy -u NACI2 --verbose -p force-app/main/default -c
+
+      - name: Authorize NACI3
+        if: ${{ env.PR_NUMBER%3 == 1 }}
+        run: sfdx auth:jwt:grant -u $USERNAME1 -f ./buildfiles/WorldpayDevHub.key -i $CLIENTID1 -r $URL -a NACI3
+
+      - name: Test NACI3 Deploy
+        if: ${{ env.PR_NUMBER%3 == 1 }}
+        run: |
+          cd ReleaseDeploy
+          sfdx force:source:deploy -u NACI3 --verbose -p force-app/main/default -c
+		  
+      - name: Authorize NACI4
+        if: ${{ env.PR_NUMBER%3 == 2 }}
+        run: sfdx auth:jwt:grant -u $USERNAME2 -f ./buildfiles/WorldpayDevHub.key -i $CLIENTID2 -r $URL -a NACI4
+
+      - name: Test NACI4 Deploy
+        if: ${{ env.PR_NUMBER%3 == 2 }}
+        run: |
+          cd ReleaseDeploy
+          sfdx force:source:deploy -u NACI4 --verbose -p force-app/main/default -c
