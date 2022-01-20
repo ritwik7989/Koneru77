@@ -53,32 +53,36 @@ jobs:
           tar xJf sfdx-linux-amd64.tar.xz -C sfdx-cli --strip-components 1
           ./sfdx-cli/install
 
+      - name: Get MOD Value
+        run: |
+         echo ::set-env name=REMAINDER::$(($PR_NUMBER%3))
+         
       - name: Authorize NACI2
-        if: ${{ env.PR_NUMBER%3 == 0 }}
+        if: ${{ env.REMAINDER == 0 }}
         run: sfdx auth:jwt:grant -u $USERNAME -f ./buildfiles/WorldpayDevHub.key -i $CLIENTID -r $URL -a NACI2
 
       - name: Test NACI2 Deploy
-        if: ${{ env.PR_NUMBER%3 == 0 }}
+        if: ${{ env.REMAINDER == 0 }}
         run: |
          cd ReleaseDeploy
          sfdx force:source:deploy -u NACI2 --verbose -p force-app/main/default -c
 
       - name: Authorize NACI3
-        if: ${{ env.PR_NUMBER%3 == 1 }}
+        if: ${{ env.REMAINDER == 1 }}
         run: sfdx auth:jwt:grant -u $USERNAME1 -f ./buildfiles/WorldpayDevHub.key -i $CLIENTID1 -r $URL -a NACI3
 
       - name: Test NACI3 Deploy
-        if: ${{ env.PR_NUMBER%3 == 1 }}
+        if: ${{ env.REMAINDER == 1 }}
         run: |
           cd ReleaseDeploy
           sfdx force:source:deploy -u NACI3 --verbose -p force-app/main/default -c
 
       - name: Authorize NACI4
-        if: ${{ env.PR_NUMBER%3 == 2 }}
+        if: ${{ env.REMAINDER == 2 }}
         run: sfdx auth:jwt:grant -u $USERNAME2 -f ./buildfiles/WorldpayDevHub.key -i $CLIENTID2 -r $URL -a NACI4
 
       - name: Test NACI4 Deploy
-        if: ${{ env.PR_NUMBER%3 == 2 }}
+        if: ${{ env.REMAINDER == 2 }}
         run: |
           cd ReleaseDeploy
           sfdx force:source:deploy -u NACI4 --verbose -p force-app/main/default -c
