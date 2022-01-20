@@ -23,7 +23,7 @@ jobs:
     timeout-minutes: 60
     env:
       URL: https://test.salesforce.com
-      PR_NUMBER: 200
+      PR_NUMBER: ${{ github.event.number }}
       USERNAME: fisdevopsuser@fisglobal.com.na.naci2
       CLIENTID: 3MVG9eMnfmfDO5NDmXW4W0sFRz0vaqk_OPeYnNq6B601ASzoC.6ATAee3lPyJZeIQgG5CSFIQVNYLy8k1HNZ4a   
       USERNAME1: fisdevopsuser@fisglobal.com.na.naci3
@@ -43,7 +43,10 @@ jobs:
 
       - name: Fetch All Branches
         run: git fetch --all
-
+      
+      - name: Execute GitDiff
+        run: java -cp java -jar ./buildfiles/GitDiff.jar $BASEBRANCH CheckOnly
+        
       - name: Install SFDX
         run: |
           wget https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz
@@ -51,7 +54,7 @@ jobs:
           tar xJf sfdx-linux-amd64.tar.xz -C sfdx-cli --strip-components 1
           ./sfdx-cli/install
 
-      - name: Get MOD Value
+      - name: Get REMAINDER Value
         run: |
          echo ::set-env name=REMAINDER::$(($PR_NUMBER%3))
          
