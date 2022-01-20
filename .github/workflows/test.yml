@@ -23,16 +23,15 @@ jobs:
     timeout-minutes: 60
     env:
       URL: https://test.salesforce.com
-      PR_NUMBER: ${{ github.event.number }}
+      PR_NUMBER: 200
       USERNAME: fisdevopsuser@fisglobal.com.na.naci2
-      CLIENTID: 3MVG9eMnfmfDO5NDmXW4W0sFRz0vaqk_OPeYnNq6B601ASzoC.6ATAee3lPyJZeIQgG5CSFIQVNYLy8k1HNZ4
+      CLIENTID: 3MVG9eMnfmfDO5NDmXW4W0sFRz0vaqk_OPeYnNq6B601ASzoC.6ATAee3lPyJZeIQgG5CSFIQVNYLy8k1HNZ4a
       USERNAME1: fisdevopsuser@fisglobal.com.na.naci3
-      CLIENTID1: 3MVG9eMnfmfDO5NDmXW4W0sFRz0cKS8iSW30vIdscgzKPNMTVZxzVr9ULyC_hFXdm022tx6e_Q2_KTQwGd22A
+      CLIENTID1: 3MVG9eMnfmfDO5NDmXW4W0sFRz0cKS8iSW30vIdscgzKPNMTVZxzVr9ULyC_hFXdm022tx6e_Q2_KTQwGd22Aa
       USERNAME2: fisdevopsuser@fisglobal.com.na.naci4
-      CLIENTID2: 3MVG9EMJF5MdlzDpZV.paxtHtZ0jjVLQp7hWrRkHVJdeM2RYibrVXpeTJvZA3LHq5v5xbKdO7KaXzGGuJBN7x
+      CLIENTID2: 3MVG9EMJF5MdlzDpZV.paxtHtZ0jjVLQp7hWrRkHVJdeM2RYibrVXpeTJvZA3LHq5v5xbKdO7KaXzGGuJBN7xa
       SFDX_USE_GENERIC_UNIX_KEYCHAIN: true
-      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
-      BASEBRANCH:  origin/master
+BASEBRANCH:  origin/master
     steps:
       - uses: actions/checkout@v2
 
@@ -43,9 +42,6 @@ jobs:
 
       - name: Fetch All Branches
         run: git fetch --all
-      
-      - name: Execute GitDiff
-        run: java -cp java -jar ./buildfiles/GitDiff.jar $BASEBRANCH CheckOnly
         
       - name: Install SFDX
         run: |
@@ -56,7 +52,7 @@ jobs:
 
       - name: Get REMAINDER Value
         run: |
-         echo ::set-env name=REMAINDER::$(($PR_NUMBER%3))
+         echo "{REMAINDER}=$(($PR_NUMBER%3))" >> $GITHUB_ENV
          
       - name: Authorize NACI2
         if: ${{ env.REMAINDER == 0 }}
