@@ -31,6 +31,7 @@ jobs:
       USERNAME2: fisdevopsuser@fisglobal.com.na.naci4
       CLIENTID2: 3MVG9EMJF5MdlzDpZV.paxtHtZ0jjVLQp7hWrRkHVJdeM2RYibrVXpeTJvZA3LHq5v5xbKdO7KaXzGGuJBN7xa
       SFDX_USE_GENERIC_UNIX_KEYCHAIN: true
+      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
       BASEBRANCH:  origin/master
     steps:
       - uses: actions/checkout@v2
@@ -52,8 +53,9 @@ jobs:
 
       - name: Get REMAINDER Value
         run: |
+         echo ::set-env name=REMAINDER::$(($PR_NUMBER%3))
          echo "{REMAINDER}=$(($PR_NUMBER%3))" >> $GITHUB_ENV
-         
+     
       - name: Authorize NACI2
         if: ${{ env.REMAINDER == 0 }}
         run: sfdx auth:jwt:grant -u $USERNAME -f ./buildfiles/WorldpayDevHub.key -i $CLIENTID -r $URL -a NACI2
