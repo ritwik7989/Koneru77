@@ -52,7 +52,7 @@ jobs:
 
       - name: Get REMAINDER Value
         run: |
-         echo ::set-env name=REMAINDER::$(($PR_NUMBER%3))
+         "{REMAINDER}=$(($PR_NUMBER%3))" >> $GITHUB_ENV
      
       - name: Authorize NACI2
         if: ${{ env.REMAINDER == 0 }}
